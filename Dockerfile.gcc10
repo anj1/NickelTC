@@ -1,0 +1,25 @@
+FROM ghcr.io/pgaskin/nickeltc:1@sha256:3296eb400d270cfd26f5773ab09625d4469f85680b3a191951dfb78d8ade7840
+
+USER root
+
+RUN sed -i 's|http://deb.debian.org/debian|https://archive.debian.org/debian|g; s|http://security.debian.org/debian-security|https://archive.debian.org/debian-security|g' /etc/apt/sources.list \
+    && sed -i '/buster-updates/d' /etc/apt/sources.list \
+    && apt-get -o Acquire::Check-Valid-Until=false update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        debian-archive-keyring=2019.1+deb10u2 \
+    && printf '%s\n' 'deb https://archive.debian.org/debian bullseye main' > /etc/apt/sources.list.d/bullseye.list \
+    && apt-get -o Acquire::Check-Valid-Until=false update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        gcc-10-arm-linux-gnueabihf=10.2.1-6cross1 \
+        g++-10-arm-linux-gnueabihf=10.2.1-6cross1 \
+        python3-pip=20.3.4-4+deb11u1 \
+        quilt=0.66-2.1 \
+        imagemagick=8:6.9.11.60+dfsg-1.3+deb11u4 \
+        librsvg2-bin=2.50.3+dfsg-1+deb11u1 \
+        xsltproc=1.1.34-4+deb11u1 \
+        sox=14.4.2+git20190427-2+deb11u2 \
+    && pip3 install --no-cache-dir meson==1.3.2 \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV NICKEL_SYSROOT=/tc/arm-nickel-linux-gnueabihf/arm-nickel-linux-gnueabihf/sysroot
+ENV PATH=/usr/bin:/tc/arm-nickel-linux-gnueabihf/bin:${PATH}

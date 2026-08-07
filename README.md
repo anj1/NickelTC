@@ -1,6 +1,6 @@
 # NickelTC
 
-[![Build](https://github.com/pgaskin/NickelTC/workflows/Build/badge.svg)](https://github.com/pgaskin/NickelTC/actions)
+[![Build](https://github.com/anj1/NickelTC/workflows/Build/badge.svg)](https://github.com/anj1/NickelTC/actions)
 
 A dockerized, deterministic, automated, fixed, and fully-relocatable build of [@NiLuJe](https://github.com/pgaskin/NiLuJe)'s [toolchain](http://trac.ak-team.com/trac/log/niluje/Configs/trunk/Kindle/Misc) for Kobo eReaders.
 
@@ -126,3 +126,29 @@ standard utilities:
 - Packages (may be removed without notice): `help2man` `libdbus-1-dev`
   `libicu-dev` `libncurses-dev` `libpng-dev` `pigz` `python3-distutils`
   `python3-pip` `tclsh` `texinfo` `zlib1g-dev`
+
+### Coroutine validation variant
+
+`Dockerfile.gcc10` is a small derivative image for the XCSoar Kobo work.
+It keeps the same toolchain base, pinned by digest, and adds the newer
+compiler and helper packages required by the coroutine-enabled validation build.
+The extra Debian packages and Meson are pinned to exact versions.
+
+Build it and compile the validation binary locally with:
+
+```sh
+IMAGE=nickeltc-gcc10 ./build-coroutine-validation.sh
+```
+
+The validation binary can then be packaged with:
+
+```sh
+./package-coroutine-validation.sh
+```
+
+GitHub Actions builds this image, compiles the Kobo-packaged coroutine
+validation binary plus a static QEMU validation binary, runs the static validation binary
+under QEMU, uploads the packaged Kobo validation package, and publishes `ghcr.io/anj1/nickeltc-gcc10` on pushes. Published tags are immutable
+addressing tags only: `sha-<full-commit-sha>` for pushed commits and the full
+git tag name for version tags such as `v1.0.0-gcc10`. The workflow records the
+published image digest in the run summary.
